@@ -1,0 +1,17 @@
+{
+  "name": "codecademy-personal-budget",
+  "version": "1.0.0",
+  "description": "API for personal budget functionality. Envelope budget technique. CREATE, READ, UPDATE, DELETE functionality.\r Envelopes are allocated for each budget category, bills, shopping, etc..\r Purchases are taken out of the envelopes for each type of purchase.\r ### You can't overspend! Once the envelope money runs out, you can't withdraw any more.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.2"
+  }
+}
