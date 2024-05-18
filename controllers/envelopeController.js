@@ -1,54 +1,106 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'codecademypersonalbudget',
+  password: 'password',
+  port: 5432,
+});
+
+async function connectAndQuery(query, values) {
+  try {
+    const res = await pool.query(query, values);
+    return res;
+  } catch (err) {
+    console.error('Query error', err.stack);
+  } 
+}
+// Example usage
+//connectAndQuery('SELECT * FROM employees');
+
+exports.pool;
+exports.connectAndQuery;
+
 let envelopes = [];
 
-exports.createEnvelope = (req, res) => {
+exports.createEnvelope = async (req, res) => {
+  //need to send this back:
+  //response1.body.id
   const { name, amount } = req.body;
-  const envelope = { id: Date.now().toString(), name, amount };
-  envelopes.push(envelope);
-  res.status(201).json(envelope);
+  const id = Date.now().toString();
+
+  const query = 'INSERT INTO envelope (id, name, amount) VALUES ($1, $2, $3)';
+  const values = [id, name, amount];
+
+  const databaseResponse = await connectAndQuery(query, values);
+
+  res.status(201).json({ id , databaseResponse });
 };
 
-exports.getAllEnvelopes = (req, res) => {
-  res.status(200).json(envelopes);
+exports.getAllEnvelopes = async (req, res) => {
+
+  const query = 'SELECT * FROM envelope';
+  const values = [];
+
+  const databaseResponse = await connectAndQuery(query, values);
+  res.status(200).json(databaseResponse.rows);
 };
 
-exports.getEnvelopeById = (req, res) => {
-  const envelope = envelopes.find(env => env.id === req.params.id);
-  if (!envelope) {
+exports.getEnvelopeById = async (req, res) => {
+  const query = 'SELECT * FROM envelope WHERE id = $1';
+  const values = [req.params.id];
+
+  const databaseResponse = await connectAndQuery(query, values);
+
+  if (databaseResponse.rows.length == 0) {
     return res.status(404).json({ message: 'Envelope not found' });
   }
-  res.status(200).json(envelope);
+  res.status(200).json(databaseResponse.rows);
 };
 
-exports.updateEnvelope = (req, res) => {
-  const envelopeIndex = envelopes.findIndex(env => env.id === req.params.id);
-  if (envelopeIndex === -1) {
-    return res.status(404).json({ message: 'Envelope not found' });
-  }
-  const updatedEnvelope = { ...envelopes[envelopeIndex], ...req.body };
-  envelopes[envelopeIndex] = updatedEnvelope;
-  res.status(200).json(updatedEnvelope);
+exports.updateEnvelope = async (req, res) => {
+  const query = 'UPDATE envelope SET amount = $1 WHERE id = $2';
+  const { amount } = req.body;
+  const values = [amount, req.params.id];
+
+  const databaseResponse = await connectAndQuery(query, values);
+  
+  res.status(200).json(databaseResponse.rows);
 };
 
-exports.deleteEnvelope = (req, res) => {
-  const envelopeIndex = envelopes.findIndex(env => env.id === req.params.id);
-  if (envelopeIndex === -1) {
-    return res.status(404).json({ message: 'Envelope not found' });
-  }
-  envelopes.splice(envelopeIndex, 1);
-  res.status(204).json();
+exports.deleteEnvelope = async (req, res) => {
+  const query = 'DELETE FROM envelope WHERE id = $1';
+  const values = [req.params.id];
+
+  const databaseResponse = await connectAndQuery(query, values);
+  
+  res.status(200).json(databaseResponse.rows);
 };
 
-exports.transferBudget = (req, res) => {
+exports.transferBudget = async (req, res) => {
   const { from, to, amount } = req.body;
-  const fromEnvelope = envelopes.find(env => env.id === from);
-  const toEnvelope = envelopes.find(env => env.id === to);
-  if (!fromEnvelope || !toEnvelope) {
-    return res.status(404).json({ message: 'Envelope not found' });
-  }
-  if (fromEnvelope.amount < amount) {
+  const query = 'SELECT amount FROM envelope WHERE id = $1';
+  const values = [from];
+
+  const databaseResponse = await connectAndQuery(query, values);
+
+  //check that database has enough money in row to take from
+  if (databaseResponse.rows[0].amount < amount) {
     return res.status(400).json({ message: 'Insufficient funds in the source envelope' });
   }
-  fromEnvelope.amount -= amount;
-  toEnvelope.amount += amount;
+
+  //take money from from envelope
+  const query1 = 'UPDATE envelope SET amount = amount - $1 WHERE id = $2';
+  const values1 = [amount, from];
+
+  const databaseResponse1 = await connectAndQuery(query1, values1);
+
+  //add money to to envelope
+  const query2 = 'UPDATE envelope SET amount = amount + $1 WHERE id = $2';
+  const values2 = [amount, to];
+
+  const databaseResponse2 = await connectAndQuery(query2, values2);
+
   res.status(200).json({ message: 'Budget transferred successfully' });
 };

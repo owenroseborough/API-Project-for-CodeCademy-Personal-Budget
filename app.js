@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const envelopeRoutes = require('./routes/envelopeRoutes');
 const request = require('supertest');
 
+const connectAndQuery = require('./controllers/envelopeController');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -29,53 +31,70 @@ async function testCreateEnvelopes() {
   const response1 = await request(app)
     .post('/envelopes')
     .send({ name: 'Groceries', amount: 200 });
-  console.log(response1.status);
   envelopeIds.push(response1.body.id);
 
   const response2 = await request(app)
     .post('/envelopes')
     .send({ name: 'Entertainment', amount: 100 });
-  console.log(response2.status);
   envelopeIds.push(response2.body.id);
 
   const response3 = await request(app)
     .post('/envelopes')
     .send({ name: 'Bills', amount: 100 });
-  console.log(response3.status);
   envelopeIds.push(response3.body.id);
+
+  if (response1.status == '201' && response2.status == '201' && response3.status == '201'){
+    console.log('testCreateEnvelopes()        returned: 201');
+  }
+  else{
+    console.log('testCreateEnvelopes() returned an error');
+  }
 }
 
 async function testGetAllEnvelopes() {
   const response = await request(app)
     .get('/envelopes');
-  console.log(response.status);
-  console.log(response.body.length == envelopeIds.length);
+  allEnvelopes = JSON.parse(response.text);
+  console.log('testGetAllEnvelopes()        returned: ' + response.status);
 }
 
 async function testGetIndividualEnvelopes() {
+  let responseCodes = [];
   for (const id of envelopeIds) {
     const response = await request(app)
       .get(`/envelopes/${id}`);
-    console.log(response.status);
-    console.log(response.body.id);
+    responseCodes.push(response.status)
+  }
+  if(responseCodes.every(code => code === 200)){
+    console.log('testGetIndividualEnvelopes() returned: 200');
+  }
+  else{
+    console.log('testGetIndividualEnvelopes() returned an error');
   }
 }
 
 async function testUpdateEnvelopes() {
+  let responseCodes = [];
   const updatedAmount = 300;
   for (const id of envelopeIds) {
     const response = await request(app)
       .put(`/envelopes/${id}`)
       .send({ amount: updatedAmount });
-    console.log(response.status);
-    console.log(response.body.amount);
+      responseCodes.push(response.status)
+  }
+  if(responseCodes.every(code => code === 200)){
+    console.log('testUpdateEnvelopes()        returned: 200');
+  }
+  else{
+    console.log('testUpdateEnvelopes()      returned an error');
   }
 }
 
 async function testDeleteEnvelope() {
+  let id = envelopeIds[0];
   const response = await request(app)
-    .delete(`/envelopes/${envelopeIds[0]}`);
-  console.log(response.status);
+    .delete(`/envelopes/${id}`);
+  console.log('testDeleteEnvelope()         returned: ' + response.status);
 }
 
 async function testTransferBudgets() {
@@ -86,21 +105,24 @@ async function testTransferBudgets() {
   const response = await request(app)
     .post('/envelopes/transfer')
     .send({ from: fromEnvelopeId, to: toEnvelopeId, amount: amountToTransfer });
-  console.log(response.status);
+    console.log('testTransferBudgets()         returned: ' + response.status);
+}
 
-  // Check if budget was transferred correctly
-  const fromEnvelopeResponse = await request(app)
-    .get(`/envelopes/${fromEnvelopeId}`);
-  const toEnvelopeResponse = await request(app)
-    .get(`/envelopes/${toEnvelopeId}`);
-  console.log(fromEnvelopeResponse.body.amount);
-  console.log(toEnvelopeResponse.body.amount);
+async function shutdownPool() {
+  try {
+    await pool.end();
+    console.log('Database pool has ended');
+  } catch (err) {
+    console.error('Error shutting down the pool', err.stack);
+  }
 }
 
 // Start the server and run tests
 if (require.main === module) {
   app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    //uncomment if we need to create table for deployment on Render
+    //connectAndQuery('CREATE TABLE envelope (id TEXT PRIMARY KEY, name TEXT, amount integer)', [])
     await runTests();
     process.exit(0); // Exit the process after running tests
   });
