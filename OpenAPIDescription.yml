@@ -1,0 +1,112 @@
+openapi: 3.0.1
+info:
+  title: CodeCademy Personal Budget API
+  version: 1.0.0
+  description: A basic API for personal budgeting
+paths:
+  /envelopes:
+    summary: envelopes hold amounts of money budgeted for certain things
+    post:
+      summary: create envelope
+      description: create envelope with name and amount of money allocated
+      operationId: createEnvelope
+      responses:
+        '201':
+          description: returns created envelope details
+          content:
+            application/json:
+              examples:
+                envelope:
+                  value: '{"envelope":{"id":123,"name":"Entertainment","amount":200}}'
+        default:
+          description: Default error sample response
+    get:
+      summary: get all envelopes
+      description: get all envelopes
+      operationId: getAllEnvelopes
+      responses:
+        '200':
+          description: returns all envelope details
+          content:
+            application/json:
+              examples:
+                envelopes:
+                  value: |-
+                    {"envelopes":[
+                    {"id":123,"name":"Entertainment","amount":200},
+                    {"id":124,"name":"Food","amount":100},
+                    {"id":125,"name":"Commuting","amount":300}
+                    ]}
+        default:
+          description: Default error sample response
+    put:
+      summary: update an envelope
+      description: update an envelope
+      operationId: updateEnvelope
+      responses:
+        '201':
+          description: returns updated envelope details
+          content:
+            application/json:
+              examples:
+                envelope updated:
+                  value: '{"envelope":{"id":123,"name":"Entertainment","amount":200}}'
+        default:
+          description: Default error sample response
+    delete:
+      summary: delete an envelope
+      description: delete an envelope
+      operationId: deleteEnvelope
+      responses:
+        '200':
+          description: returns deleted envelope details
+          content:
+            application/json:
+              examples:
+                envelope delete:
+                  value: '{"envelope":{"id":123,"name":"Entertainment","amount":200}}'
+        default:
+          description: Default error sample response
+  /envelopes/transfer:
+    summary: transfer funds from one element to another
+    put:
+      summary: transfer funds from one envelope to another
+      description: transfer funds from one envelope to another
+      operationId: transferFundsTwoEnvelopes
+      responses:
+        '200':
+          description: returns envelope details for two envelopes transfered between
+          content:
+            application/json:
+              examples:
+                envelope transfer:
+                  value: >-
+                    {"envelopes":[{"envelope taken
+                    from":{"id":123,"name":"Entertainment","amount":200}},
+                    {"envelope given
+                    to":{"id":123,"name":"Entertainment","amount":200}}]}
+        default:
+          description: Default error sample response
+  /envelopes/{id}:
+    summary: get a single envelope
+    get:
+      summary: get individual envelope
+      description: get individual envelope
+      operationId: getIndividualEnvelope
+      parameters:
+        - name: id
+          in: path
+          description: 'The id of the individual envelope.'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: returns individual envelope details
+          content:
+            application/json:
+              examples:
+                get single envelope:
+                  value: '{"envelope":{"id":123,"name":"Entertainment","amount":200}}'
+        default:
+          description: Default error sample response
