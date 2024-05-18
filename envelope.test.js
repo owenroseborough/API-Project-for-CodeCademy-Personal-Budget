@@ -59,8 +59,8 @@ describe('Envelopes API', () => {
   });
 
   it('should transfer budgets between two envelopes', async () => {
-    const fromEnvelopeId = envelopeIds[0];
-    const toEnvelopeId = envelopeIds[1];
+    const fromEnvelopeId = envelopeIds[1];
+    const toEnvelopeId = envelopeIds[2];
     const amountToTransfer = 50;
 
     const response = await request(app)

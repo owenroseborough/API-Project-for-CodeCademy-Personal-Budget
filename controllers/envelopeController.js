@@ -39,9 +39,6 @@ exports.deleteEnvelope = (req, res) => {
 };
 
 exports.transferBudget = (req, res) => {
-  for(const id of envelopes){
-    console.log(id.name , id.amount);
-  }
   const { from, to, amount } = req.body;
   const fromEnvelope = envelopes.find(env => env.id === from);
   const toEnvelope = envelopes.find(env => env.id === to);

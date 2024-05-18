@@ -1,0 +1,5 @@
+Table Name: Envelope
+id - text - primary key
+name - text
+amount - integer
+
