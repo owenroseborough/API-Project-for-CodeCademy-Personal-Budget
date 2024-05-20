@@ -25,13 +25,6 @@ async function connectAndQuery(query, values) {
     console.error('Query error', err.stack);
   } 
 }
-// Example usage
-//connectAndQuery('SELECT * FROM employees');
-
-exports.pool;
-exports.connectAndQuery;
-
-let envelopes = [];
 
 exports.createEnvelope = async (req, res) => {
   //need to send this back:

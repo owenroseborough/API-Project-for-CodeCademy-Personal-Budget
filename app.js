@@ -3,8 +3,6 @@ const bodyParser = require('body-parser');
 const envelopeRoutes = require('./routes/envelopeRoutes');
 const request = require('supertest');
 
-const connectAndQuery = require('./controllers/envelopeController');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
