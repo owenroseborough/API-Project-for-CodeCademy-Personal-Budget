@@ -7,7 +7,6 @@ const connectAndQuery = require('./controllers/envelopeController');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const DATABASE_URL = process.env.DATABASE_URL;
 
 // Middleware
 app.use(bodyParser.json());
