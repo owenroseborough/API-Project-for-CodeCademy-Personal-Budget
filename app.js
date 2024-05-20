@@ -6,7 +6,7 @@ const request = require('supertest');
 const connectAndQuery = require('./controllers/envelopeController');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(bodyParser.json());
@@ -119,13 +119,11 @@ async function shutdownPool() {
 
 // Start the server and run tests
 if (require.main === module) {
-  app.listen(PORT, async () => {
-    console.log(`Server is running on port ${PORT}`);
-    //uncomment if we need to create table for deployment on Render
-    //connectAndQuery('CREATE TABLE envelope (id TEXT PRIMARY KEY, name TEXT, amount integer)', [])
-    await runTests();
-    process.exit(0); // Exit the process after running tests
-  });
+
+  const server = app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+
+  server.keepAliveTimeout = 120 * 1000;
+  server.headersTimeout = 120 * 1000;
 }
 
 module.exports = app;
