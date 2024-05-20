@@ -8,7 +8,6 @@
 //});
 
 const { Pool } = require('pg');
-const fetch = require('node-fetch');
 const DATABASE_URL = process.env.DATABASE_URL;
 // Database connection
 const pool = new Pool({
