@@ -1,16 +1,25 @@
-const { Pool } = require('pg');
+//local database connection settings
+//const pool = new Pool({
+//  user: 'postgres',
+//  host: 'localhost',
+//  database: 'codecademypersonalbudget',
+//  password: 'password',
+//  port: 5432,
+//});
 
+const { Pool } = require('pg');
+const fetch = require('node-fetch');
+const DATABASE_URL = process.env.DATABASE_URL;
+// Database connection
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'codecademypersonalbudget',
-  password: 'password',
-  port: 5432,
+  connectionString: DATABASE_URL,
 });
 
 async function connectAndQuery(query, values) {
   try {
-    const res = await pool.query(query, values);
+    const client = await pool.connect();
+    const res = await client.query(query, values);
+    client.release();
     return res;
   } catch (err) {
     console.error('Query error', err.stack);
